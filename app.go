@@ -1,0 +1,17 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/letsdoit_back/app/router"
+)
+
+func main() {
+    port := ":9090"
+    fmt.Printf("Up and running on localhost%v\n", port)
+    
+    http.HandleFunc("/", router.HandleIndex)
+    
+    http.ListenAndServe(port, nil)
+}
