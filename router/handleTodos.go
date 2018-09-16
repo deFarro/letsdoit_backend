@@ -7,7 +7,8 @@ import (
 	"github.com/letsdoit_back/app/database"
 )
 
-func HandleIndex(w http.ResponseWriter, r *http.Request) {
+// HandleTodos return all todos
+func HandleTodos(w http.ResponseWriter, r *http.Request) {
 	data := database.FetchTodos()
 
 	payload, err := json.Marshal(data)

@@ -8,10 +8,11 @@ import (
 )
 
 func main() {
-    port := ":9090"
-    fmt.Printf("Up and running on localhost%v\n", port)
-    
-    http.HandleFunc("/", router.HandleIndex)
-    
-    http.ListenAndServe(port, nil)
+	port := ":9090"
+	fmt.Printf("Up and running on localhost%v\n", port)
+
+	http.HandleFunc("/user", router.HandleUser)
+	http.HandleFunc("/todos", router.HandleTodos)
+
+	http.ListenAndServe(port, nil)
 }
