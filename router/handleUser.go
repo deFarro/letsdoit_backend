@@ -12,29 +12,28 @@ import (
 // HandleUser handles user request
 func HandleUser(w http.ResponseWriter, r *http.Request) {
 	reqPayload, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-
 	if err != nil {
-		w.Write([]byte("error while reading request payload"))
+		data.SendError("error while reading request payload", w)
 		return
 	}
+	r.Body.Close()
 
 	var user data.User
 	err = json.Unmarshal(reqPayload, &user)
 	if err != nil {
-		w.Write([]byte("error while unmarshalling request payload"))
+		data.SendError("error while unmarshalling request payload", w)
 		return
 	}
 
-	data, err := database.FetchUser(user)
+	dbuser, err := database.FetchUser(user)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		data.SendError(err.Error(), w)
 		return
 	}
 
-	resPayload, err := data.MarshallJSON()
+	resPayload, err := dbuser.MarshallJSON()
 	if err != nil {
-		w.Write([]byte("error while marshalling response"))
+		data.SendError("error while marshalling response", w)
 		return
 	}
 

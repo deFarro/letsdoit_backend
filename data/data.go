@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -24,6 +25,29 @@ type User struct {
 	Username  string `json:"username"`
 	SessionID string `json:"sessionId"`
 	Password  string `json:"password"`
+}
+
+// Error type for errors
+type Error struct {
+	Error   bool   `json:"error"`
+	Message string `json:"message"`
+}
+
+// NewError generates new error
+func NewError(m string) Error {
+	return Error{
+		Error:   true,
+		Message: m,
+	}
+}
+
+// SendError sends error to client
+func SendError(m string, w http.ResponseWriter) {
+	err := NewError(m)
+
+	payload, _ := json.Marshal(err)
+
+	w.Write(payload)
 }
 
 // GenerateSessionID generates unique sessionID
