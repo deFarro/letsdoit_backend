@@ -12,8 +12,14 @@ func main() {
 	port := ":9090"
 	fmt.Printf("Up and running on localhost%v\n", port)
 
-	http.Handle("/user", middleware.Adapt(
-		http.HandlerFunc(router.HandleUser),
+	http.Handle("/user/login", middleware.Adapt(
+		http.HandlerFunc(router.HandleLogin),
+		middleware.WithHeaders,
+		middleware.WithLogging,
+	))
+
+	http.Handle("/user/logout", middleware.Adapt(
+		http.HandlerFunc(router.HandleLogout),
 		middleware.WithHeaders,
 		middleware.WithLogging,
 	))

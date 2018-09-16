@@ -13,13 +13,16 @@ func Adapt(h http.Handler, adapters ...Adapter) http.Handler {
 	for _, adapter := range adapters {
 		h = adapter(h)
 	}
+
 	return h
 }
 
 // WithLogging is the middleware for logging incoming requests
 func WithLogging(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("Incoming request. Path: %s. Method: %s.\n", r.URL.Path, r.Method)
+		if r.Method != "OPTIONS" {
+			fmt.Printf("Incoming request. Path: %s. Method: %s.\n", r.URL.Path, r.Method)
+		}
 		h.ServeHTTP(w, r)
 	})
 }

@@ -15,16 +15,17 @@ type Todos []Todo
 type Todo struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Status      string `json:"status"`
 	ID          string `json:"id"`
 	Author      User   `json:"author"`
 }
 
 // User is the type for a user
 type User struct {
-	ID        string `json:"id"`
-	Username  string `json:"username"`
-	SessionID string `json:"sessionId"`
-	Password  string `json:"password"`
+	ID           string `json:"id"`
+	Username     string `json:"username"`
+	SessionID    string `json:"sessionID"`
+	PasswordHash string `json:"password"`
 }
 
 // Error type for errors
@@ -62,7 +63,7 @@ func (u *User) MarshallJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		ID        string `json:"id"`
 		Username  string `json:"username"`
-		SessionID string `json:"sessionId"`
+		SessionID string `json:"sessionID"`
 	}{
 		ID:        u.ID,
 		Username:  u.Username,

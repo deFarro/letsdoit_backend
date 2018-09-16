@@ -9,8 +9,12 @@ import (
 	"github.com/letsdoit_back/app/database"
 )
 
-// HandleUser handles user request
-func HandleUser(w http.ResponseWriter, r *http.Request) {
+// HandleLogin handles user login request
+func HandleLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	reqPayload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		data.SendError("error while reading request payload", w)

@@ -10,11 +10,16 @@ import (
 
 // HandleTodos return all todos
 func HandleTodos(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	todos := database.FetchTodos()
 
 	payload, err := json.Marshal(todos)
 	if err != nil {
 		data.SendError("error while marshalling response", w)
+		return
 	}
 
 	w.Write(payload)
