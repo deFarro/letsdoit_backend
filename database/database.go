@@ -18,15 +18,15 @@ func FetchTodos() data.Todos {
 			Author:      user,
 		},
 		data.Todo{
-			Title:       "Todo 1",
-			Description: "Do something",
-			ID:          "1",
+			Title:       "Todo 2",
+			Description: "Do another something",
+			ID:          "2",
 			Author:      user,
 		},
 		data.Todo{
-			Title:       "Todo 1",
-			Description: "Do something",
-			ID:          "1",
+			Title:       "Todo 3",
+			Description: "Do something more",
+			ID:          "3",
 			Author:      user,
 		},
 	}
