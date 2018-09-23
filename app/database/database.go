@@ -6,15 +6,13 @@ import (
 	"github.com/deFarro/letsdoit_backend/app/data"
 )
 
-var mockUser = data.User{ID: "123", Username: "tom"}
-
-var dbUsers = []data.User{
-	data.User{
-		ID:           "123",
-		Username:     "tom",
-		PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
-	},
+var mockUser = data.User{
+	ID:           "123",
+	Username:     "tom",
+	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
 }
+
+var dbUsers = []data.User{mockUser}
 
 var dbTodos = data.Todos{
 	data.Todo{
@@ -22,21 +20,21 @@ var dbTodos = data.Todos{
 		Description: "Do something",
 		Status:      "notCompleted",
 		ID:          "0",
-		Author:      mockUser,
+		Author:      mockUser.Public(),
 	},
 	data.Todo{
 		Title:       "Todo 2",
 		Description: "Do another something",
 		Status:      "notCompleted",
 		ID:          "1",
-		Author:      mockUser,
+		Author:      mockUser.Public(),
 	},
 	data.Todo{
 		Title:       "Todo 3",
 		Description: "Do something more",
 		Status:      "completed",
 		ID:          "2",
-		Author:      mockUser,
+		Author:      mockUser.Public(),
 	},
 }
 
