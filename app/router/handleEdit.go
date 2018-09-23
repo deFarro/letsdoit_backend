@@ -34,7 +34,7 @@ func HandleEdit(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "PUT":
-		updatedTodo, err := database.AddTodo(sessionID, todo)
+		updatedTodo, err := database.UpdateTodo(sessionID, todo)
 		if err != nil {
 			data.SendError(err.Error(), w)
 		}

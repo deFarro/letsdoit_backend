@@ -12,7 +12,14 @@ var mockUser = data.User{
 	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
 }
 
-var dbUsers = []data.User{mockUser}
+var dbUsers = []data.User{
+	mockUser,
+	data.User{
+		ID:           "321",
+		Username:     "jack",
+		PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
+	},
+}
 
 var dbTodos = data.Todos{
 	data.Todo{
@@ -88,8 +95,8 @@ func FlushTodo(sessionID, todoID string) error {
 	return errors.New("delete is forbidden")
 }
 
-// AddTodo replaces/adds todo to database
-func AddTodo(sessionID string, todo data.Todo) (data.Todo, error) {
+// UpdateTodo replaces/adds todo to database
+func UpdateTodo(sessionID string, todo data.Todo) (data.Todo, error) {
 	user, err := GetUserBySessionID(sessionID)
 	if err != nil {
 		return data.Todo{}, err
@@ -103,7 +110,7 @@ func AddTodo(sessionID string, todo data.Todo) (data.Todo, error) {
 	}
 
 	for i, dbTodo := range dbTodos {
-		if dbTodo.ID == todo.ID && dbTodo.Author.ID == user.ID {
+		if dbTodo.ID == todo.ID && IsAllowedToEdit(dbTodo, todo, user) {
 			dbTodos[i] = todo
 
 			return todo, nil
@@ -138,4 +145,11 @@ func GetTodoByID(id string) (data.Todo, int, error) {
 // DeleteTodo removes todo from db
 func DeleteTodo(i int) {
 	dbTodos = append(dbTodos[:i], dbTodos[i+1:]...)
+}
+
+// IsAllowedToEdit checks if content is kept. If so anyone can change todo's status
+func IsAllowedToEdit(todo1, todo2 data.Todo, user data.User) bool {
+	contendKept := todo1.Title == todo2.Title && todo1.Description == todo2.Description
+
+	return contendKept || todo1.Author.ID == user.ID
 }
