@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/letsdoit_back/app/middleware"
-	"github.com/letsdoit_back/app/router"
+	"github.com/deFarro/letsdoit_backend/app/middleware"
+	"github.com/deFarro/letsdoit_backend/app/router"
 )
 
 func main() {

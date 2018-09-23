@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/letsdoit_back/app/data"
-	"github.com/letsdoit_back/app/database"
+	"github.com/deFarro/letsdoit_backend/app/data"
+	"github.com/deFarro/letsdoit_backend/app/database"
 )
 
 // HandleTodos return all todos

@@ -3,7 +3,7 @@ package database
 import (
 	"errors"
 
-	"github.com/letsdoit_back/app/data"
+	"github.com/deFarro/letsdoit_backend/app/data"
 )
 
 var dbUsers = []data.User{
