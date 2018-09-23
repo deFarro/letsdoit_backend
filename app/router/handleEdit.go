@@ -11,20 +11,10 @@ import (
 
 // HandleEdit handles user login request
 func HandleEdit(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "DELETE":
-		DeleteTodo(w, r)
-
-	case "PUT":
-		return
-
-	default:
+	if r.Method == "OPTIONS" {
 		return
 	}
-}
 
-// DeleteTodo handles todo removing
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	sessionID := query.Get("sessionID")
 
@@ -42,8 +32,28 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.FlushTodo(sessionID, todo.ID)
-	if err != nil {
-		data.SendError(err.Error(), w)
+	switch r.Method {
+	case "PUT":
+		updatedTodo, err := database.AddTodo(sessionID, todo)
+		if err != nil {
+			data.SendError(err.Error(), w)
+		}
+
+		payload, err := json.Marshal(updatedTodo)
+		if err != nil {
+			data.SendError("error while marshalling response", w)
+			return
+		}
+
+		w.Write(payload)
+
+	case "DELETE":
+		err = database.FlushTodo(sessionID, todo.ID)
+		if err != nil {
+			data.SendError(err.Error(), w)
+		}
+
+	default:
+		return
 	}
 }

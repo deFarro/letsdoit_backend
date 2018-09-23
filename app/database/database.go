@@ -21,21 +21,21 @@ var dbTodos = data.Todos{
 		Title:       "Todo 1",
 		Description: "Do something",
 		Status:      "notCompleted",
-		ID:          "1",
+		ID:          "0",
 		Author:      mockUser,
 	},
 	data.Todo{
 		Title:       "Todo 2",
 		Description: "Do another something",
 		Status:      "notCompleted",
-		ID:          "2",
+		ID:          "1",
 		Author:      mockUser,
 	},
 	data.Todo{
 		Title:       "Todo 3",
 		Description: "Do something more",
 		Status:      "completed",
-		ID:          "3",
+		ID:          "2",
 		Author:      mockUser,
 	},
 }
@@ -88,6 +88,31 @@ func FlushTodo(sessionID, todoID string) error {
 	}
 
 	return errors.New("delete is forbidden")
+}
+
+// AddTodo replaces/adds todo to database
+func AddTodo(sessionID string, todo data.Todo) (data.Todo, error) {
+	user, err := GetUserBySessionID(sessionID)
+	if err != nil {
+		return data.Todo{}, err
+	}
+
+	if todo.ID == "" {
+		todo.ID = todo.GenerateTodoID()
+		dbTodos = append(dbTodos, todo)
+
+		return todo, nil
+	}
+
+	for i, dbTodo := range dbTodos {
+		if dbTodo.ID == todo.ID && dbTodo.Author.ID == user.ID {
+			dbTodos[i] = todo
+
+			return todo, nil
+		}
+	}
+
+	return data.Todo{}, errors.New("todo not found or editing is forbidden")
 }
 
 // GetUserBySessionID searches for user with session ID

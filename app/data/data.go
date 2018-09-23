@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -53,9 +54,16 @@ func SendError(m string, w http.ResponseWriter) {
 
 // GenerateSessionID generates unique sessionID
 func (u User) GenerateSessionID() string {
-	salt := string(time.Now().Unix())
+	salt := strconv.FormatInt(time.Now().Unix(), 10)
 
 	return fmt.Sprintf("%x", md5.Sum([]byte(u.Username+salt)))
+}
+
+// GenerateTodoID generates unique ID for a todo
+func (t Todo) GenerateTodoID() string {
+	salt := strconv.FormatInt(time.Now().Unix(), 10)
+
+	return fmt.Sprintf("%x", md5.Sum([]byte(t.Title+t.Description+salt)))
 }
 
 // MarshallJSON custom json marshaller to hide some fields
