@@ -30,5 +30,11 @@ func main() {
 		middleware.WithLogging,
 	))
 
+	http.Handle("/todo", middleware.Adapt(
+		http.HandlerFunc(router.HandleEdit),
+		middleware.WithHeaders,
+		middleware.WithLogging,
+	))
+
 	http.ListenAndServe(port, nil)
 }

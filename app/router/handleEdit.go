@@ -9,11 +9,24 @@ import (
 	"github.com/deFarro/letsdoit_backend/app/database"
 )
 
-// HandleLogin handles user login request
-func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
+// HandleEdit handles user login request
+func HandleEdit(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "DELETE":
+		DeleteTodo(w, r)
+
+	case "PUT":
+		return
+
+	default:
 		return
 	}
+}
+
+// DeleteTodo handles todo removing
+func DeleteTodo(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	sessionID := query.Get("sessionID")
 
 	reqPayload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -22,24 +35,15 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var user data.User
-	err = json.Unmarshal(reqPayload, &user)
+	var todo data.Todo
+	err = json.Unmarshal(reqPayload, &todo)
 	if err != nil {
 		data.SendError("error while unmarshalling request payload", w)
 		return
 	}
 
-	dbuser, err := database.FetchUser(user)
+	err = database.FlushTodo(sessionID, todo.ID)
 	if err != nil {
 		data.SendError(err.Error(), w)
-		return
 	}
-
-	resPayload, err := dbuser.MarshallJSON()
-	if err != nil {
-		data.SendError("error while marshalling response", w)
-		return
-	}
-
-	w.Write(resPayload)
 }
