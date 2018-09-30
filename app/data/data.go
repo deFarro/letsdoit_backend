@@ -9,8 +9,36 @@ import (
 	"time"
 )
 
-// Todos is the type for all todos
+// SortedTodos is the type for all todos
+type SortedTodos struct {
+	Upcoming   Todos `json:"upcoming"`
+	InProgress Todos `json:"inprogress"`
+	Completed  Todos `json:"completed"`
+}
+
+// Todos is the type for a list of todos
 type Todos []Todo
+
+// Sort method distribute todos to buckets based on status
+func (tds Todos) Sort() SortedTodos {
+	result := SortedTodos{}
+
+	for _, todo := range tds {
+		switch todo.Status {
+		case "upcoming":
+			result.Upcoming = append(result.Upcoming, todo)
+
+		case "inprogress":
+			result.InProgress = append(result.InProgress, todo)
+
+		case "completed":
+			result.Completed = append(result.Completed, todo)
+
+		}
+	}
+
+	return result
+}
 
 // Todo is the type for a single todo
 type Todo struct {

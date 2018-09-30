@@ -25,14 +25,14 @@ var dbTodos = data.Todos{
 	data.Todo{
 		Title:       "Todo 1",
 		Description: "Do something",
-		Status:      "notCompleted",
+		Status:      "upcoming",
 		ID:          "0",
 		Author:      mockUser.Public(),
 	},
 	data.Todo{
 		Title:       "Todo 2",
 		Description: "Do another something",
-		Status:      "notCompleted",
+		Status:      "upcoming",
 		ID:          "1",
 		Author:      mockUser.Public(),
 	},
@@ -43,11 +43,18 @@ var dbTodos = data.Todos{
 		ID:          "2",
 		Author:      mockUser.Public(),
 	},
+	data.Todo{
+		Title:       "Todo 4",
+		Description: "Do something then",
+		Status:      "inprogress",
+		ID:          "2",
+		Author:      mockUser.Public(),
+	},
 }
 
 // FetchTodos mocks database request
-func FetchTodos() data.Todos {
-	return dbTodos
+func FetchTodos() data.SortedTodos {
+	return dbTodos.Sort()
 }
 
 // FetchUser mocks database request
