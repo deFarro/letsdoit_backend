@@ -14,7 +14,7 @@ var mockUser = data.User{
 
 var dbUsers = []data.User{
 	mockUser,
-	data.User{
+	{
 		ID:           "321",
 		Username:     "jack",
 		PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
@@ -47,7 +47,7 @@ var dbTodos = data.Todos{
 		Title:       "Todo 4",
 		Description: "Do something then",
 		Status:      "inprogress",
-		ID:          "2",
+		ID:          "3",
 		Author:      mockUser.Public(),
 	},
 }

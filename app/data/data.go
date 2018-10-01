@@ -21,7 +21,11 @@ type Todos []Todo
 
 // Sort method distribute todos to buckets based on status
 func (tds Todos) Sort() SortedTodos {
-	result := SortedTodos{}
+	result := SortedTodos{
+		Upcoming: []Todo{},
+		InProgress: []Todo{},
+		Completed: []Todo{},
+	}
 
 	for _, todo := range tds {
 		switch todo.Status {
@@ -33,7 +37,6 @@ func (tds Todos) Sort() SortedTodos {
 
 		case "completed":
 			result.Completed = append(result.Completed, todo)
-
 		}
 	}
 
