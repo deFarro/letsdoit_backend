@@ -93,8 +93,8 @@ var dbTodosSlice = []data.Todo{
 	},
 }
 
-// prepopulateDatabase populates database wwith users and todos if it's empty
-func prepopulateDatabase(db *pg.DB) error {
+// PrepopulateDatabase populates database wwith users and todos if it's empty
+func PrepopulateDatabase(db *pg.DB) error {
 	// populate users
 	err := db.CreateTable(&data.User{}, &orm.CreateTableOptions{})
 	if err == nil {
@@ -122,8 +122,8 @@ func prepopulateDatabase(db *pg.DB) error {
 	return nil
 }
 
-// dropTables deletes all tables
-func dropTables(db *pg.DB) error {
+// DropTables deletes all tables
+func DropTables(db *pg.DB) error {
 	for _, model := range []interface{}{&data.User{}, &data.Todos{}} {
 		err := db.DropTable(model, &orm.DropTableOptions{})
 		if err != nil {
@@ -136,32 +136,25 @@ func dropTables(db *pg.DB) error {
 }
 
 // FetchTodos mocks database request
-func FetchTodos() data.SortedTodos {
-	db := pg.Connect(&pg.Options{
-		Database: "letsdoit",
-		User: "letsdoit_back",
-	})
-	defer db.Close()
-
-	err := prepopulateDatabase(db)
-    //err := dropTables(db)
-    if err != nil {
-    	log.Println(err)
-	}
-
+func FetchTodos(db *pg.DB) data.SortedTodos {
 	currentUser := data.User{ ID: "321"}
 	db.Select(&currentUser)
 	log.Println(currentUser)
 
-	currentTodo := data.Todo{ ID: "0"}
-	db.Select(&currentTodo)
-	log.Println(currentTodo)
 
-	return dbTodos.Sort()
+	var todos data.Todos
+	db.Model(&todos).Select()
+	log.Println(todos)
+
+	return todos.Sort()
 }
 
 // FetchUser mocks database request
-func FetchUser(user data.User) (data.User, error) {
+func FetchUser(db *pg.DB, user data.User) (data.User, error) {
+	//currentUser := data.User{ ID: "321"}
+	//db.Select(&currentUser)
+	//log.Println(currentUser)
+
 	for i, dbUser := range dbUsers {
 		if user.Username == dbUser.Username && user.PasswordHash == dbUser.PasswordHash {
 			dbUsers[i].SessionID = dbUser.GenerateSessionID()

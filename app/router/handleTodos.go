@@ -9,12 +9,12 @@ import (
 )
 
 // HandleTodos return all todos
-func HandleTodos(w http.ResponseWriter, r *http.Request) {
+func (router *Router) HandleTodos(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
 	}
 
-	todos := database.FetchTodos()
+	todos := database.FetchTodos(router.Database)
 
 	payload, err := json.Marshal(todos)
 	if err != nil {

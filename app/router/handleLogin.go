@@ -10,7 +10,7 @@ import (
 )
 
 // HandleLogin handles user login request
-func HandleLogin(w http.ResponseWriter, r *http.Request) {
+func (router *Router) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
 	}
@@ -29,7 +29,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbuser, err := database.FetchUser(user)
+	dbuser, err := database.FetchUser(router.Database, user)
 	if err != nil {
 		data.SendError(err.Error(), w)
 		return

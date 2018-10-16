@@ -10,7 +10,7 @@ import (
 )
 
 // HandleEdit handles user login request
-func HandleEdit(w http.ResponseWriter, r *http.Request) {
+func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
 	}

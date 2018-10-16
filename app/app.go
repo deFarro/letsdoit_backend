@@ -3,14 +3,25 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"log"
 
 	"github.com/deFarro/letsdoit_backend/app/middleware"
 	"github.com/deFarro/letsdoit_backend/app/router"
+	"github.com/deFarro/letsdoit_backend/app/config"
 )
 
 func main() {
-	port := ":9090"
-	fmt.Printf("Up and running on localhost%v\n", port)
+	config, err := config.GetConfig("config.yml")
+	if err != nil {
+		log.Fatalf("error while reading config file: %s\n", err)
+	}
+
+	router, err := router.NewRouter(config)
+	if err != nil {
+		log.Fatalf("error while creating router: %s\n", err)
+	}
+
+	fmt.Printf("Up and running on localhost:%s\n", config.AppPort)
 
 	http.Handle("/user/login", middleware.Adapt(
 		http.HandlerFunc(router.HandleLogin),
@@ -36,5 +47,5 @@ func main() {
 		middleware.WithLogging,
 	))
 
-	http.ListenAndServe(port, nil)
+	http.ListenAndServe(":" + config.AppPort, nil)
 }

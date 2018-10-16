@@ -8,7 +8,7 @@ import (
 )
 
 // HandleLogout handles user login request
-func HandleLogout(w http.ResponseWriter, r *http.Request) {
+func (router *Router) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
 	}
