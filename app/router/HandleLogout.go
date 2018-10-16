@@ -15,7 +15,7 @@ func (router *Router) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	sessionID := query.Get("sessionID")
 
-	err := database.DropSession(sessionID)
+	err := database.DropSession(router.Database, sessionID)
 	if err != nil {
 		SendError(err.Error(), w)
 	}

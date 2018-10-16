@@ -108,7 +108,7 @@ func PrepopulateDatabase(db *pg.DB) error {
 		if err != nil {
 			return err
 		}
-		log.Println("Database is populated with users")
+		fmt.Println("Database is populated with users")
 	} else {
 		log.Println(err)
 	}
@@ -118,9 +118,17 @@ func PrepopulateDatabase(db *pg.DB) error {
 	if err == nil {
 		err := db.Insert(&dbTodosSlice)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 		fmt.Println("Database is populated with todos")
+	} else {
+		log.Println(err)
+	}
+
+	// create table for sessions
+	err = db.CreateTable(&Session{}, &orm.CreateTableOptions{})
+	if err == nil {
+		fmt.Println("Sessions table was created")
 	} else {
 		log.Println(err)
 	}
@@ -130,7 +138,7 @@ func PrepopulateDatabase(db *pg.DB) error {
 
 // DropTables deletes all tables
 func DropTables(db *pg.DB) error {
-	for _, model := range []interface{}{&data.User{}, &data.Todos{}} {
+	for _, model := range []interface{}{&data.User{}, &data.Todos{}, &Session{}} {
 		err := db.DropTable(model, &orm.DropTableOptions{
 			IfExists: true,
 			Cascade:  true,
@@ -168,20 +176,24 @@ func FetchUser(db *pg.DB, user data.User) (data.User, error) {
 		return data.User{}, errors.New("wrong password")
 	}
 
+	session := Session{
+		ID: currentUser.GenerateSessionID(),
+		UserID: currentUser.ID,
+	}
+
+	err = db.Insert(&session)
+	if err != nil {
+		return data.User{}, errors.New("cannot save session")
+	}
+
+	currentUser.SessionID = session.ID
+
 	return currentUser, nil
 }
 
 // DropSession function to clear sessionID
-func DropSession(sessionID string) error {
-	for _, dbUser := range dbUsers {
-		if dbUser.SessionID == sessionID {
-			dbUser.SessionID = ""
-
-			return nil
-		}
-	}
-
-	return errors.New("sessionID was not found")
+func DropSession(db *pg.DB, sessionID string) error {
+	return db.Delete(&Session{ ID: sessionID })
 }
 
 // FlushTodo deletes todo from db
