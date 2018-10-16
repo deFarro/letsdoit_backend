@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/deFarro/letsdoit_backend/app/data"
 	"github.com/deFarro/letsdoit_backend/app/database"
 )
 
@@ -14,11 +13,15 @@ func (router *Router) HandleTodos(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todos := database.FetchTodos(router.Database)
+	todos, err := database.FetchTodos(router.Database)
+	if err != nil {
+		SendError(err.Error(), w)
+		return
+	}
 
 	payload, err := json.Marshal(todos)
 	if err != nil {
-		data.SendError("error while marshalling response", w)
+		SendError("error while marshalling response", w)
 		return
 	}
 

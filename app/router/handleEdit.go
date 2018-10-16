@@ -20,7 +20,7 @@ func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 
 	reqPayload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		data.SendError("error while reading request payload", w)
+		SendError("error while reading request payload", w)
 		return
 	}
 	defer r.Body.Close()
@@ -28,7 +28,7 @@ func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 	var todo data.Todo
 	err = json.Unmarshal(reqPayload, &todo)
 	if err != nil {
-		data.SendError("error while unmarshalling request payload", w)
+		SendError("error while unmarshalling request payload", w)
 		return
 	}
 
@@ -36,21 +36,20 @@ func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 	case "PUT":
 		updatedTodo, err := database.UpdateTodo(sessionID, todo)
 		if err != nil {
-			data.SendError(err.Error(), w)
+			SendError(err.Error(), w)
 		}
 
 		payload, err := json.Marshal(updatedTodo)
 		if err != nil {
-			data.SendError("error while marshalling response", w)
-			return
-		}
+			SendError("error while marshalling response", w)
+			return		}
 
 		w.Write(payload)
 
 	case "DELETE":
 		err = database.FlushTodo(sessionID, todo.ID)
 		if err != nil {
-			data.SendError(err.Error(), w)
+			SendError(err.Error(), w)
 		}
 
 	default:

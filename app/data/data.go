@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 	"time"
 )
@@ -99,27 +98,4 @@ func (u *User) MarshallJSON() ([]byte, error) {
 		Username:  u.Username,
 		SessionID: u.SessionID,
 	})
-}
-
-// Error type for errors
-type Error struct {
-	Error   bool   `json:"error"`
-	Message string `json:"message"`
-}
-
-// NewError generates new error
-func NewError(m string) Error {
-	return Error{
-		Error:   true,
-		Message: m,
-	}
-}
-
-// SendError sends error to client
-func SendError(m string, w http.ResponseWriter) {
-	err := NewError(m)
-
-	payload, _ := json.Marshal(err)
-
-	w.Write(payload)
 }

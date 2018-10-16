@@ -3,7 +3,6 @@ package router
 import (
 	"net/http"
 
-	"github.com/deFarro/letsdoit_backend/app/data"
 	"github.com/deFarro/letsdoit_backend/app/database"
 )
 
@@ -18,6 +17,6 @@ func (router *Router) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 	err := database.DropSession(sessionID)
 	if err != nil {
-		data.SendError(err.Error(), w)
+		SendError(err.Error(), w)
 	}
 }

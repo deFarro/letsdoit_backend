@@ -8,16 +8,22 @@ import (
 	"log"
 	"github.com/go-pg/pg/orm"
 	"fmt"
+	"crypto/md5"
 )
 
+type Session struct {
+	ID string
+	UserID string
+}
+
 var mockUser = data.User{
-	ID:           "123",
+	ID:           "34b7da764b21d298ef307d04d8152dc5",
 	Username:     "tom",
 	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
 }
 
 var mockUser2 = data.User{
-	ID:           "321",
+	ID:           "4ff9fc6e4e5d5f590c4f2134a8cc96d1",
 	Username:     "jack",
 	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
 }
@@ -125,7 +131,10 @@ func PrepopulateDatabase(db *pg.DB) error {
 // DropTables deletes all tables
 func DropTables(db *pg.DB) error {
 	for _, model := range []interface{}{&data.User{}, &data.Todos{}} {
-		err := db.DropTable(model, &orm.DropTableOptions{})
+		err := db.DropTable(model, &orm.DropTableOptions{
+			IfExists: true,
+			Cascade:  true,
+		})
 		if err != nil {
 			return err
 		}
@@ -136,34 +145,30 @@ func DropTables(db *pg.DB) error {
 }
 
 // FetchTodos mocks database request
-func FetchTodos(db *pg.DB) data.SortedTodos {
-	currentUser := data.User{ ID: "321"}
-	db.Select(&currentUser)
-	log.Println(currentUser)
-
-
+func FetchTodos(db *pg.DB) (data.SortedTodos, error) {
 	var todos data.Todos
-	db.Model(&todos).Select()
-	log.Println(todos)
+	err := db.Model(&todos).Select()
+	if err != nil {
+		return data.SortedTodos{}, err
+	}
 
-	return todos.Sort()
+	return todos.Sort(), nil
 }
 
 // FetchUser mocks database request
 func FetchUser(db *pg.DB, user data.User) (data.User, error) {
-	//currentUser := data.User{ ID: "321"}
-	//db.Select(&currentUser)
-	//log.Println(currentUser)
-
-	for i, dbUser := range dbUsers {
-		if user.Username == dbUser.Username && user.PasswordHash == dbUser.PasswordHash {
-			dbUsers[i].SessionID = dbUser.GenerateSessionID()
-
-			return dbUsers[i], nil
-		}
+	userID := fmt.Sprintf("%x", md5.Sum([]byte(user.Username)))
+	currentUser := data.User{ ID: userID }
+	err := db.Select(&currentUser)
+	if err != nil {
+		return data.User{}, errors.New("user not found")
 	}
 
-	return data.User{}, errors.New("user not found")
+	if currentUser.PasswordHash != user.PasswordHash {
+		return data.User{}, errors.New("wrong password")
+	}
+
+	return currentUser, nil
 }
 
 // DropSession function to clear sessionID

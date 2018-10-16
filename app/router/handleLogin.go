@@ -17,7 +17,7 @@ func (router *Router) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	reqPayload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		data.SendError("error while reading request payload", w)
+		SendError("error while reading request payload", w)
 		return
 	}
 	defer r.Body.Close()
@@ -25,19 +25,19 @@ func (router *Router) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	var user data.User
 	err = json.Unmarshal(reqPayload, &user)
 	if err != nil {
-		data.SendError("error while unmarshalling request payload", w)
+		SendError("error while unmarshalling request payload", w)
 		return
 	}
 
 	dbuser, err := database.FetchUser(router.Database, user)
 	if err != nil {
-		data.SendError(err.Error(), w)
+		SendError(err.Error(), w)
 		return
 	}
 
 	resPayload, err := dbuser.MarshallJSON()
 	if err != nil {
-		data.SendError("error while marshalling response", w)
+		SendError("error while marshalling response", w)
 		return
 	}
 
