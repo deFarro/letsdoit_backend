@@ -47,7 +47,7 @@ func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 		w.Write(payload)
 
 	case "DELETE":
-		err = database.FlushTodo(sessionID, todo.ID)
+		err = router.Database.FlushTodo(sessionID, todo.ID)
 		if err != nil {
 			SendError(err.Error(), w)
 		}

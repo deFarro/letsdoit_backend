@@ -227,22 +227,27 @@ func (db *Database) DropSession(sessionID string) error {
 }
 
 // FlushTodo deletes todo from db
-func FlushTodo(sessionID, todoID string) error {
-	user, err := GetUserBySessionID(sessionID)
+func (db *Database) FlushTodo(sessionID, todoID string) error {
+	user, err := db.GetUserBySessionID(sessionID)
 	if err != nil {
 		return err
 	}
 
-	todo, i, err := GetTodoByID(todoID)
+	todo, err := db.GetTodoByID(todoID)
 	if err != nil {
 		return err
 	}
 
-	if user.ID == todo.Author.ID {
-		DeleteTodo(i)
+	if user.ID != todo.Author.ID {
+		return errors.New("delete is forbidden")
 	}
 
-	return errors.New("delete is forbidden")
+	err = db.DeleteTodo(todo)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // UpdateTodo replaces/adds todo to database
@@ -318,6 +323,16 @@ func (db *Database) GetTodoByID(id string) (data.Todo, error) {
 	}
 
 	return todo, nil
+}
+
+// DeleteTodo delets todo in db
+func (db *Database) DeleteTodo(todo data.Todo) error {
+	err := db.DB.Delete(&todo)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetTodoByID searches for todo with ID
