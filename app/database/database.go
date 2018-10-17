@@ -9,7 +9,36 @@ import (
 	"github.com/go-pg/pg/orm"
 	"fmt"
 	"crypto/md5"
+	"github.com/deFarro/letsdoit_backend/app/config"
 )
+
+type Database struct {
+	DB pg.DB
+}
+
+// NewDatabase creates new database
+func NewDatabase(settings config.Config) (Database, error) {
+	db := pg.Connect(&pg.Options{
+		Database: settings.DatabaseName,
+		User: settings.DatabaseUser,
+	})
+
+	database := Database{
+		DB: *db,
+	}
+
+	err := database.DropTables()
+	if err != nil {
+		return Database{}, err
+	}
+
+	err = database.PrepopulateDatabase()
+	if err != nil {
+		return Database{}, err
+	}
+
+	return database, nil
+}
 
 type Session struct {
 	ID string
@@ -100,11 +129,11 @@ var dbTodosSlice = []data.Todo{
 }
 
 // PrepopulateDatabase populates database wwith users and todos if it's empty
-func PrepopulateDatabase(db *pg.DB) error {
+func (db *Database) PrepopulateDatabase() error {
 	// populate users
-	err := db.CreateTable(&data.User{}, &orm.CreateTableOptions{})
+	err := db.DB.CreateTable(&data.User{}, &orm.CreateTableOptions{})
 	if err == nil {
-		err := db.Insert(&dbUsers)
+		err := db.DB.Insert(&dbUsers)
 		if err != nil {
 			return err
 		}
@@ -114,9 +143,9 @@ func PrepopulateDatabase(db *pg.DB) error {
 	}
 
 	// populate todos
-	err = db.CreateTable(&data.Todo{}, &orm.CreateTableOptions{})
+	err = db.DB.CreateTable(&data.Todo{}, &orm.CreateTableOptions{})
 	if err == nil {
-		err := db.Insert(&dbTodosSlice)
+		err := db.DB.Insert(&dbTodosSlice)
 		if err != nil {
 			return err
 		}
@@ -126,7 +155,9 @@ func PrepopulateDatabase(db *pg.DB) error {
 	}
 
 	// create table for sessions
-	err = db.CreateTable(&Session{}, &orm.CreateTableOptions{})
+	err = db.DB.CreateTable(&Session{}, &orm.CreateTableOptions{
+		Temp: true,
+	})
 	if err == nil {
 		fmt.Println("Sessions table was created")
 	} else {
@@ -137,9 +168,9 @@ func PrepopulateDatabase(db *pg.DB) error {
 }
 
 // DropTables deletes all tables
-func DropTables(db *pg.DB) error {
+func (db *Database) DropTables() error {
 	for _, model := range []interface{}{&data.User{}, &data.Todos{}, &Session{}} {
-		err := db.DropTable(model, &orm.DropTableOptions{
+		err := db.DB.DropTable(model, &orm.DropTableOptions{
 			IfExists: true,
 			Cascade:  true,
 		})
@@ -153,9 +184,9 @@ func DropTables(db *pg.DB) error {
 }
 
 // FetchTodos mocks database request
-func FetchTodos(db *pg.DB) (data.SortedTodos, error) {
+func (db *Database) FetchTodos() (data.SortedTodos, error) {
 	var todos data.Todos
-	err := db.Model(&todos).Select()
+	err := db.DB.Model(&todos).Select()
 	if err != nil {
 		return data.SortedTodos{}, err
 	}
@@ -164,10 +195,10 @@ func FetchTodos(db *pg.DB) (data.SortedTodos, error) {
 }
 
 // FetchUser mocks database request
-func FetchUser(db *pg.DB, user data.User) (data.User, error) {
+func (db *Database) FetchUser(user data.User) (data.User, error) {
 	userID := fmt.Sprintf("%x", md5.Sum([]byte(user.Username)))
 	currentUser := data.User{ ID: userID }
-	err := db.Select(&currentUser)
+	err := db.DB.Select(&currentUser)
 	if err != nil {
 		return data.User{}, errors.New("user not found")
 	}
@@ -181,7 +212,7 @@ func FetchUser(db *pg.DB, user data.User) (data.User, error) {
 		UserID: currentUser.ID,
 	}
 
-	err = db.Insert(&session)
+	err = db.DB.Insert(&session)
 	if err != nil {
 		return data.User{}, errors.New("cannot save session")
 	}
@@ -192,8 +223,8 @@ func FetchUser(db *pg.DB, user data.User) (data.User, error) {
 }
 
 // DropSession function to clear sessionID
-func DropSession(db *pg.DB, sessionID string) error {
-	return db.Delete(&Session{ ID: sessionID })
+func (db *Database) DropSession(sessionID string) error {
+	return db.DB.Delete(&Session{ ID: sessionID })
 }
 
 // FlushTodo deletes todo from db

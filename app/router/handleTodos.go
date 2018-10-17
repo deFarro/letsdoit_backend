@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/deFarro/letsdoit_backend/app/database"
 )
 
 // HandleTodos return all todos
@@ -13,7 +12,7 @@ func (router *Router) HandleTodos(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todos, err := database.FetchTodos(router.Database)
+	todos, err := router.Database.FetchTodos()
 	if err != nil {
 		SendError(err.Error(), w)
 		return

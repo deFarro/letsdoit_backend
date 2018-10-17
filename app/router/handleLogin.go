@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/deFarro/letsdoit_backend/app/data"
-	"github.com/deFarro/letsdoit_backend/app/database"
 )
 
 // HandleLogin handles user login request
@@ -29,7 +28,7 @@ func (router *Router) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbuser, err := database.FetchUser(router.Database, user)
+	dbuser, err := router.Database.FetchUser(user)
 	if err != nil {
 		SendError(err.Error(), w)
 		return

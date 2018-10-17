@@ -1,7 +1,6 @@
 package router
 
 import (
-	"github.com/go-pg/pg"
 	"github.com/deFarro/letsdoit_backend/app/config"
 	"github.com/deFarro/letsdoit_backend/app/database"
 	"net/http"
@@ -10,22 +9,12 @@ import (
 
 type Router struct {
 	Settings config.Config
-	Database *pg.DB
+	Database database.Database
 }
 
 // NewRouter creates new router instance
 func NewRouter(settings config.Config) (Router, error) {
-	db := pg.Connect(&pg.Options{
-		Database: settings.DatabaseName,
-		User: settings.DatabaseUser,
-	})
-
-	err := database.DropTables(db)
-	if err != nil {
-		return Router{}, err
-	}
-
-	err = database.PrepopulateDatabase(db)
+	db, err := database.NewDatabase(settings)
 	if err != nil {
 		return Router{}, err
 	}
