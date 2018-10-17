@@ -45,19 +45,21 @@ type Session struct {
 	UserID string
 }
 
-var mockUser = data.User{
+var mockUser1 = data.User{
 	ID:           "34b7da764b21d298ef307d04d8152dc5",
 	Username:     "tom",
 	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
 }
 
-var dbUsers = []data.User{
-	mockUser,
-	{
-		ID:           "4ff9fc6e4e5d5f590c4f2134a8cc96d1",
-		Username:     "jack",
-		PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
-	},
+var mockUser2 = data.User{
+	ID:           "4ff9fc6e4e5d5f590c4f2134a8cc96d1",
+	Username:     "jack",
+	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
+}
+
+var initialUsers = []data.User{
+	mockUser1,
+	mockUser2,
 	{
 		ID:           "098f6bcd4621d373cade4e832627b4f6",
 		Username:     "test",
@@ -65,65 +67,34 @@ var dbUsers = []data.User{
 	},
 }
 
-var dbTodos = data.Todos{
-	data.Todo{
-		Title:       "Todo 1",
-		Description: "Do something",
-		Status:      "upcoming",
-		ID:          "0",
-		Author:      mockUser.Public(),
-	},
-	data.Todo{
-		Title:       "Todo 2",
-		Description: "Do another something",
-		Status:      "upcoming",
-		ID:          "1",
-		Author:      mockUser.Public(),
-	},
-	data.Todo{
-		Title:       "Todo 3",
-		Description: "Do something more",
-		Status:      "completed",
-		ID:          "2",
-		Author:      mockUser.Public(),
-	},
-	data.Todo{
-		Title:       "Todo 4",
-		Description: "Do something then",
-		Status:      "inprogress",
-		ID:          "3",
-		Author:      mockUser.Public(),
-	},
-}
-
-var dbTodosSlice = []data.Todo{
+var initialTodos = []data.Todo{
 	{
 		Title:       "Todo 1",
 		Description: "Do something",
 		Status:      "upcoming",
-		ID:          "0",
-		Author:      mockUser.Public(),
+		ID:          "00f8a3d99253b2dc9916622fa94695081",
+		Author:      mockUser1.Public(),
 	},
 	{
 		Title:       "Todo 2",
 		Description: "Do another something",
 		Status:      "upcoming",
-		ID:          "1",
-		Author:      mockUser.Public(),
+		ID:          "3d10c8a7f51d9bf167d5ff88f2c16342",
+		Author:      mockUser1.Public(),
 	},
 	{
 		Title:       "Todo 3",
 		Description: "Do something more",
 		Status:      "completed",
-		ID:          "2",
-		Author:      mockUser.Public(),
+		ID:          "87650fde932ba43a878379b57644f006",
+		Author:      mockUser1.Public(),
 	},
 	{
 		Title:       "Todo 4",
 		Description: "Do something then",
 		Status:      "inprogress",
-		ID:          "3",
-		Author:      mockUser.Public(),
+		ID:          "f97544387f8e33da389029b9ca9f74c9",
+		Author:      mockUser2.Public(),
 	},
 }
 
@@ -132,7 +103,7 @@ func (db *Database) PrepopulateDatabase() error {
 	// populate users
 	err := db.DB.CreateTable(&data.User{}, &orm.CreateTableOptions{})
 	if err == nil {
-		err := db.DB.Insert(&dbUsers)
+		err := db.DB.Insert(&initialUsers)
 		if err != nil {
 			return err
 		}
@@ -144,7 +115,7 @@ func (db *Database) PrepopulateDatabase() error {
 	// populate todos
 	err = db.DB.CreateTable(&data.Todo{}, &orm.CreateTableOptions{})
 	if err == nil {
-		err := db.DB.Insert(&dbTodosSlice)
+		err := db.DB.Insert(&initialTodos)
 		if err != nil {
 			return err
 		}
