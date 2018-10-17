@@ -51,18 +51,17 @@ var mockUser = data.User{
 	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
 }
 
-var mockUser2 = data.User{
-	ID:           "4ff9fc6e4e5d5f590c4f2134a8cc96d1",
-	Username:     "jack",
-	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
-}
-
 var dbUsers = []data.User{
 	mockUser,
 	{
-		ID:           "321",
+		ID:           "4ff9fc6e4e5d5f590c4f2134a8cc96d1",
 		Username:     "jack",
 		PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
+	},
+	{
+		ID:           "098f6bcd4621d373cade4e832627b4f6",
+		Username:     "test",
+		PasswordHash: "098f6bcd4621d373cade4e832627b4f6",
 	},
 }
 
