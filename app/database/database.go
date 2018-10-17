@@ -250,40 +250,52 @@ func (db *Database) FlushTodo(sessionID, todoID string) error {
 	return nil
 }
 
-// UpdateTodo replaces/adds todo to database
-func UpdateTodo(sessionID string, todo data.Todo) (data.Todo, error) {
-	user, err := GetUserBySessionID(sessionID)
-	if err != nil {
-		return data.Todo{}, err
-	}
-
+// AddModifyTodo adds/updates todo to database
+func (db *Database) AddModifyTodo(sessionID string, todo data.Todo) (data.Todo, error) {
+	// If todo is a new one, generate ID and save it in db
 	if todo.ID == "" {
 		todo.ID = todo.GenerateTodoID()
-		dbTodos = append(dbTodos, todo)
+
+		err := db.InsertTodo(todo)
+		if err != nil {
+			return data.Todo{}, err
+		}
 
 		return todo, nil
 	}
 
-	for i, dbTodo := range dbTodos {
-		if dbTodo.ID == todo.ID && IsAllowedToEdit(dbTodo, todo, user) {
-			dbTodos[i] = todo
-
-			return todo, nil
-		}
+	// If todo exists, check if current user have rights to edit and update it
+	user, err := db.GetUserBySessionID(sessionID)
+	if err != nil {
+		return data.Todo{}, err
 	}
 
-	return data.Todo{}, errors.New("todo not found or editing is forbidden")
+	dbTodo, err := db.GetTodoByID(todo.ID)
+	if err != nil {
+		return data.Todo{}, err
+	}
+
+	if !IsAllowedToEdit(dbTodo, todo, user) {
+		return data.Todo{}, errors.New("editing is forbidden")
+	}
+
+	err = db.UpdateTodo(todo)
+	if err != nil {
+		return data.Todo{}, err
+	}
+
+	return todo, nil
 }
 
-// GetUserBySessionID searches for user with session ID
-func GetUserBySessionID(sessionID string) (data.User, error) {
-	for _, dbUser := range dbUsers {
-		if dbUser.SessionID == sessionID {
-			return dbUser, nil
-		}
+// GetUserByID searches for user by ID
+func (db *Database) GetUserByID(id string) (data.User, error) {
+	user := data.User{ ID: id }
+	err := db.DB.Select(&user)
+	if err != nil {
+		return data.User{}, err
 	}
 
-	return data.User{}, errors.New("user not found")
+	return user, nil
 }
 
 // GetUserBySessionID searches for user with session ID
@@ -303,17 +315,6 @@ func (db *Database) GetUserBySessionID(sessionID string) (data.User, error) {
 	return user, nil
 }
 
-// GetUserByID searches for user by ID
-func (db *Database) GetUserByID(id string) (data.User, error) {
-	user := data.User{ ID: id }
-	err := db.DB.Select(&user)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	return user, nil
-}
-
 // GetTodoByID searches for todo by ID
 func (db *Database) GetTodoByID(id string) (data.Todo, error) {
 	todo := data.Todo{ ID: id }
@@ -325,7 +326,17 @@ func (db *Database) GetTodoByID(id string) (data.Todo, error) {
 	return todo, nil
 }
 
-// DeleteTodo delets todo in db
+// InsertTodo inserts todo to db
+func (db *Database) InsertTodo(todo data.Todo) error {
+	return db.DB.Insert(&todo)
+}
+
+// UpdateTodo updates todo to db
+func (db *Database) UpdateTodo(todo data.Todo) error {
+	return db.DB.Update(&todo)
+}
+
+// DeleteTodo delets todo from db
 func (db *Database) DeleteTodo(todo data.Todo) error {
 	err := db.DB.Delete(&todo)
 	if err != nil {
@@ -333,22 +344,6 @@ func (db *Database) DeleteTodo(todo data.Todo) error {
 	}
 
 	return nil
-}
-
-// GetTodoByID searches for todo with ID
-func GetTodoByID(id string) (data.Todo, int, error) {
-	for i, dbTodo := range dbTodos {
-		if dbTodo.ID == id {
-			return dbTodo, i, nil
-		}
-	}
-
-	return data.Todo{}, -1, errors.New("todo not found")
-}
-
-// DeleteTodo removes todo from db
-func DeleteTodo(i int) {
-	dbTodos = append(dbTodos[:i], dbTodos[i+1:]...)
 }
 
 // IsAllowedToEdit checks if content is kept. If so anyone can change todo's status

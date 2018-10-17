@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/deFarro/letsdoit_backend/app/data"
-	"github.com/deFarro/letsdoit_backend/app/database"
 )
 
 // HandleEdit handles user login request
@@ -34,7 +33,7 @@ func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "PUT":
-		updatedTodo, err := database.UpdateTodo(sessionID, todo)
+		updatedTodo, err := router.Database.AddModifyTodo(sessionID, todo)
 		if err != nil {
 			SendError(err.Error(), w)
 		}
