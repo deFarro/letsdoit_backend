@@ -14,9 +14,15 @@ import (
 
 type Database struct {
 	DB pg.DB
+	Settings config.Config
 }
 
-// NewDatabase creates new database
+// Method for logging database operetions
+func (db Database) log(itemType, id, action string) {
+	fmt.Printf("%s (id: %s) -> %s\n", itemType, id, action)
+}
+
+// NewDatabase creates new database and populates it
 func NewDatabase(settings config.Config) (Database, error) {
 	db := pg.Connect(&pg.Options{
 		Database: settings.DatabaseName,
@@ -25,6 +31,7 @@ func NewDatabase(settings config.Config) (Database, error) {
 
 	database := Database{
 		DB: *db,
+		Settings: settings,
 	}
 
 	err := database.DropTables()
@@ -45,60 +52,7 @@ type Session struct {
 	UserID string
 }
 
-var mockUser1 = data.User{
-	ID:           "34b7da764b21d298ef307d04d8152dc5",
-	Username:     "tom",
-	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
-}
-
-var mockUser2 = data.User{
-	ID:           "4ff9fc6e4e5d5f590c4f2134a8cc96d1",
-	Username:     "jack",
-	PasswordHash: "5f4dcc3b5aa765d61d8327deb882cf99",
-}
-
-var initialUsers = []data.User{
-	mockUser1,
-	mockUser2,
-	{
-		ID:           "098f6bcd4621d373cade4e832627b4f6",
-		Username:     "test",
-		PasswordHash: "098f6bcd4621d373cade4e832627b4f6",
-	},
-}
-
-var initialTodos = []data.Todo{
-	{
-		Title:       "Todo 1",
-		Description: "Do something",
-		Status:      "upcoming",
-		ID:          "00f8a3d99253b2dc9916622fa94695081",
-		Author:      mockUser1.Public(),
-	},
-	{
-		Title:       "Todo 2",
-		Description: "Do another something",
-		Status:      "upcoming",
-		ID:          "3d10c8a7f51d9bf167d5ff88f2c16342",
-		Author:      mockUser1.Public(),
-	},
-	{
-		Title:       "Todo 3",
-		Description: "Do something more",
-		Status:      "completed",
-		ID:          "87650fde932ba43a878379b57644f006",
-		Author:      mockUser1.Public(),
-	},
-	{
-		Title:       "Todo 4",
-		Description: "Do something then",
-		Status:      "inprogress",
-		ID:          "f97544387f8e33da389029b9ca9f74c9",
-		Author:      mockUser2.Public(),
-	},
-}
-
-// PrepopulateDatabase populates database wwith users and todos if it's empty
+// PrepopulateDatabase populates database with users and todos if it's empty
 func (db *Database) PrepopulateDatabase() error {
 	// populate users
 	err := db.DB.CreateTable(&data.User{}, &orm.CreateTableOptions{})
@@ -125,9 +79,7 @@ func (db *Database) PrepopulateDatabase() error {
 	}
 
 	// create table for sessions
-	err = db.DB.CreateTable(&Session{}, &orm.CreateTableOptions{
-		Temp: true,
-	})
+	err = db.DB.CreateTable(&Session{}, &orm.CreateTableOptions{})
 	if err == nil {
 		fmt.Println("Sessions table was created")
 	} else {
@@ -153,10 +105,9 @@ func (db *Database) DropTables() error {
 	return nil
 }
 
-// FetchTodos mocks database request
+// FetchTodos fetches all todos from db
 func (db *Database) FetchTodos() (data.SortedTodos, error) {
-	var todos data.Todos
-	err := db.DB.Model(&todos).Select()
+	todos, err := db.SelectAllTodos()
 	if err != nil {
 		return data.SortedTodos{}, err
 	}
@@ -164,7 +115,7 @@ func (db *Database) FetchTodos() (data.SortedTodos, error) {
 	return todos.Sort(), nil
 }
 
-// FetchUser mocks database request
+// FetchUser fetches user from db, checks password, create user session and returns user
 func (db *Database) FetchUser(user data.User) (data.User, error) {
 	userID := fmt.Sprintf("%x", md5.Sum([]byte(user.Username)))
 
@@ -182,7 +133,7 @@ func (db *Database) FetchUser(user data.User) (data.User, error) {
 		UserID: currentUser.ID,
 	}
 
-	err = db.DB.Insert(&session)
+	err = db.InsertSession(session)
 	if err != nil {
 		return data.User{}, errors.New("cannot save session")
 	}
@@ -256,70 +207,4 @@ func (db *Database) AddModifyTodo(sessionID string, todo data.Todo) (data.Todo, 
 	}
 
 	return todo, nil
-}
-
-// GetUserByID searches for user by ID
-func (db *Database) GetUserByID(id string) (data.User, error) {
-	user := data.User{ ID: id }
-	err := db.DB.Select(&user)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	return user, nil
-}
-
-// GetUserBySessionID searches for user with session ID
-func (db *Database) GetUserBySessionID(sessionID string) (data.User, error) {
-	session := Session{ ID: sessionID }
-	err := db.DB.Select(&session)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	user := data.User{ ID: session.UserID }
-	err = db.DB.Select(&user)
-	if err != nil {
-		return data.User{}, err
-	}
-
-	return user, nil
-}
-
-// GetTodoByID searches for todo by ID
-func (db *Database) GetTodoByID(id string) (data.Todo, error) {
-	todo := data.Todo{ ID: id }
-	err := db.DB.Select(&todo)
-	if err != nil {
-		return data.Todo{}, err
-	}
-
-	return todo, nil
-}
-
-// InsertTodo inserts todo to db
-func (db *Database) InsertTodo(todo data.Todo) error {
-	return db.DB.Insert(&todo)
-}
-
-// UpdateTodo updates todo to db
-func (db *Database) UpdateTodo(todo data.Todo) error {
-	return db.DB.Update(&todo)
-}
-
-// DeleteTodo delets todo from db
-func (db *Database) DeleteTodo(todo data.Todo) error {
-	err := db.DB.Delete(&todo)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// IsAllowedToEdit checks if content is kept. If so anyone can change todo's status
-func IsAllowedToEdit(todo1, todo2 data.Todo, user data.User) bool {
-	contendKept := todo1.Title == todo2.Title && todo1.Description == todo2.Description
-
-	return contendKept || todo1.Author.ID == user.ID
 }
