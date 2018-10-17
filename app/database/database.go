@@ -197,10 +197,10 @@ func (db *Database) FetchTodos() (data.SortedTodos, error) {
 // FetchUser mocks database request
 func (db *Database) FetchUser(user data.User) (data.User, error) {
 	userID := fmt.Sprintf("%x", md5.Sum([]byte(user.Username)))
-	currentUser := data.User{ ID: userID }
-	err := db.DB.Select(&currentUser)
+
+	currentUser, err := db.GetUserByID(userID)
 	if err != nil {
-		return data.User{}, errors.New("user not found")
+		return data.User{}, err
 	}
 
 	if currentUser.PasswordHash != user.PasswordHash {
@@ -280,6 +280,45 @@ func GetUserBySessionID(sessionID string) (data.User, error) {
 	}
 
 	return data.User{}, errors.New("user not found")
+}
+
+// GetUserBySessionID searches for user with session ID
+func (db *Database) GetUserBySessionID(sessionID string) (data.User, error) {
+	session := Session{ ID: sessionID }
+	err := db.DB.Select(&session)
+	if err != nil {
+		return data.User{}, err
+	}
+
+	user := data.User{ ID: session.UserID }
+	err = db.DB.Select(&user)
+	if err != nil {
+		return data.User{}, err
+	}
+
+	return user, nil
+}
+
+// GetUserByID searches for user by ID
+func (db *Database) GetUserByID(id string) (data.User, error) {
+	user := data.User{ ID: id }
+	err := db.DB.Select(&user)
+	if err != nil {
+		return data.User{}, err
+	}
+
+	return user, nil
+}
+
+// GetTodoByID searches for todo by ID
+func (db *Database) GetTodoByID(id string) (data.Todo, error) {
+	todo := data.Todo{ ID: id }
+	err := db.DB.Select(&todo)
+	if err != nil {
+		return data.Todo{}, err
+	}
+
+	return todo, nil
 }
 
 // GetTodoByID searches for todo with ID
