@@ -6,6 +6,7 @@ import (
 )
 
 type Config struct {
+	Version string `yaml:"version"`
 	AppPort string `yaml:"appPort"`
 	DatabaseUser string `yaml:"databaseUser"`
 	DatabaseName string `yaml:"databaseName"`

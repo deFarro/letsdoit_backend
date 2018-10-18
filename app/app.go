@@ -47,5 +47,10 @@ func main() {
 		middleware.WithLogging,
 	))
 
+	http.Handle("/version", middleware.Adapt(
+		http.HandlerFunc(router.HandleVersion),
+		middleware.WithHeaders,
+	))
+
 	http.ListenAndServe(":" + config.AppPort, nil)
 }

@@ -1,4 +1,5 @@
 ---
+version: 0.0.1
 appPort: 9090
 databaseUser: letsdoit_back
 databaseName: letsdoit
