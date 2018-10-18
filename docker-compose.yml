@@ -1,0 +1,23 @@
+---
+version: "3"
+
+services:
+  db:
+      image: postgres:10-alpine
+      restart: always
+      environment:
+        POSTGRES_DB: letsdoit
+        POSTGRES_USER: letsdoit_back
+        POSTGRES_PASSWORD: password
+      ports:
+        - "5432:5432"
+  app:
+      build: .
+      depends_on:
+        - db
+      links:
+        - db
+      ports:
+        - "9090:9090"
+      volumes:
+        - ./app:/go/src/github.com/deFarro/letsdoit_backend/app

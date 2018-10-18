@@ -1,10 +1,17 @@
 # Let's do it back-end
 
-Server side for Lets do it application (https://github.com/deFarro/letsdoit).
+Server side for "Lets do it" application (https://github.com/deFarro/letsdoit).
 
 Allows user to log in/out, add new todos, edit/delete existing ones (only author can), change status for any todo.
 
-Endpoints:
+##### Start app:
+```
+docker-compose up
+```
+
+App is listening port 9090 by default.
+
+##### Endpoints:
 
 1. "/user/login" GET - authenticate user by checking username and password hash (provides session ID)
 2. "/user/logout" GET - drop active user session

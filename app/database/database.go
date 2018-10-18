@@ -25,8 +25,10 @@ func (db Database) log(itemType, id, action string) {
 // NewDatabase creates new database and populates it
 func NewDatabase(settings config.Config) (Database, error) {
 	db := pg.Connect(&pg.Options{
+		Addr: settings.DatabaseAddr,
 		Database: settings.DatabaseName,
 		User: settings.DatabaseUser,
+		Password: settings.DatabasePassword,
 	})
 
 	database := Database{

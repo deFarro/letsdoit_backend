@@ -8,8 +8,10 @@ import (
 type Config struct {
 	Version string `yaml:"version"`
 	AppPort string `yaml:"appPort"`
-	DatabaseUser string `yaml:"databaseUser"`
+	DatabaseAddr string `yaml:"databaseAddr"`
 	DatabaseName string `yaml:"databaseName"`
+	DatabaseUser string `yaml:"databaseUser"`
+	DatabasePassword string `yaml:"databasePassword"`
 }
 
 // GetConfig generates settings from config file
