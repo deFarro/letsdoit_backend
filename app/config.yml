@@ -1,7 +1,7 @@
 ---
 version: 0.0.1
-appPort: 9090
-databaseAddr: db:5432
-databaseName: letsdoit
-databaseUser: letsdoit_back
-databasePassword: password
+
+databaseAddr: ec2-54-83-33-213.compute-1.amazonaws.com:5432
+databaseName: d59ejeo7if7por
+databaseUser: fdvcizkzomfupj
+databasePassword: *insert password here*

@@ -1,7 +1,6 @@
 FROM golang:1.9-alpine3.7
 
 ENV SRC_DIR=/go/src/github.com/deFarro/letsdoit_backend/app
-ENV PORT=9090
 
 COPY ./app $SRC_DIR
 

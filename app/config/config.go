@@ -3,6 +3,7 @@ package config
 import (
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"os"
 )
 
 type Config struct {
@@ -26,6 +27,8 @@ func GetConfig(path string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+
+	config.AppPort = os.Getenv("PORT")
 
 	return config, nil
 }
