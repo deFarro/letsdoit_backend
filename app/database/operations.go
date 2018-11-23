@@ -1,72 +1,76 @@
 package database
 
-import "github.com/deFarro/letsdoit_backend/app/data"
+import (
+	"github.com/deFarro/letsdoit_backend/app/user"
+	"github.com/deFarro/letsdoit_backend/app/todo"
+	"github.com/deFarro/letsdoit_backend/app/session"
+)
 
 // GetUserByID searches for user by ID
-func (db *Database) GetUserByID(id string) (data.User, error) {
+func (db Database) GetUserByID(id string) (user.User, error) {
 	db.log("user", id, "select")
 
-	user := data.User{ ID: id }
-	err := db.DB.Select(&user)
+	fetchedUser := user.User{ ID: id }
+	err := db.DB.Select(&fetchedUser)
 	if err != nil {
-		return data.User{}, err
+		return user.User{}, err
 	}
 
-	return user, nil
+	return fetchedUser, nil
 }
 
 // GetUserBySessionID searches for user with session ID
-func (db *Database) GetUserBySessionID(id string) (data.User, error) {
+func (db Database) GetUserBySessionID(id string) (user.User, error) {
 	session, err := db.GetSessionByID(id)
 	if err != nil {
-		return data.User{}, err
+		return user.User{}, err
 	}
 
-	user, err := db.GetUserByID(session.UserID)
+	fetchedUser, err := db.GetUserByID(session.UserID)
 	if err != nil {
-		return data.User{}, err
+		return user.User{}, err
 	}
 
-	return user, nil
+	return fetchedUser, nil
 }
 
 // GetTodoByID searches for todo by ID
-func (db *Database) GetTodoByID(id string) (data.Todo, error) {
+func (db Database) GetTodoByID(id string) (todo.Todo, error) {
 	db.log("todo", id, "select")
 
-	todo := data.Todo{ ID: id }
-	err := db.DB.Select(&todo)
+	fetchedTodo := todo.Todo{ ID: id }
+	err := db.DB.Select(&fetchedTodo)
 	if err != nil {
-		return data.Todo{}, err
+		return todo.Todo{}, err
 	}
 
-	return todo, nil
+	return fetchedTodo, nil
 }
 
 // SelectAllTodos selects all todos from db
-func (db *Database) SelectAllTodos() (data.Todos, error) {
+func (db Database) SelectAllTodos() (todo.Todos, error) {
 	db.log("todos", "all", "select")
 
-	var todos data.Todos
+	var todos todo.Todos
 	err := db.DB.Model(&todos).Select()
 
 	return todos, err
 }
 
 // InsertTodo inserts todo to db
-func (db *Database) InsertTodo(todo data.Todo) error {
+func (db Database) InsertTodo(todo todo.Todo) error {
 	db.log("todo", todo.ID, "insert")
 	return db.DB.Insert(&todo)
 }
 
 // UpdateTodo updates todo to db
-func (db *Database) UpdateTodo(todo data.Todo) error {
+func (db Database) UpdateTodo(todo todo.Todo) error {
 	db.log("todo", todo.ID, "update")
 	return db.DB.Update(&todo)
 }
 
 // DeleteTodo delets todo from db
-func (db *Database) DeleteTodo(todo data.Todo) error {
+func (db Database) DeleteTodo(todo todo.Todo) error {
 	db.log("todo", todo.ID, "delete")
 
 	err := db.DB.Delete(&todo)
@@ -78,27 +82,25 @@ func (db *Database) DeleteTodo(todo data.Todo) error {
 }
 
 // GetSessionByID searches for session by ID
-func (db *Database) GetSessionByID(id string) (Session, error) {
+func (db Database) GetSessionByID(id string) (session.Session, error) {
 	db.log("session", id, "select")
 
-	session := Session{ ID: id }
-	err := db.DB.Select(&session)
+	fetchedSession := session.Session{ ID: id }
+	err := db.DB.Select(&fetchedSession)
 	if err != nil {
-		return Session{}, err
+		return session.Session{}, err
 	}
 
-	return session, nil
+	return fetchedSession, nil
 }
 
 // InsertSession inserts session to db
-func (db *Database) InsertSession(session Session) error {
+func (db Database) InsertSession(session session.Session) error {
 	db.log("session", session.ID, "insert")
 	return db.DB.Insert(&session)
 }
 
-// IsAllowedToEdit checks if content is kept. If so anyone can change todo's status
-func IsAllowedToEdit(todo1, todo2 data.Todo, user data.User) bool {
-	contendKept := todo1.Title == todo2.Title && todo1.Description == todo2.Description
-
-	return contendKept || todo1.Author.ID == user.ID
+// DropSession function to clear sessionID
+func (db Database) DropSession(s session.Session) error {
+	return db.DB.Delete(&s)
 }

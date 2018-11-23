@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/deFarro/letsdoit_backend/app/data"
+	"github.com/deFarro/letsdoit_backend/app/user"
 )
 
 // HandleLogin handles user login request
@@ -21,14 +21,14 @@ func (router *Router) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var user data.User
+	var user user.User
 	err = json.Unmarshal(reqPayload, &user)
 	if err != nil {
 		SendError("error while unmarshalling request payload", w)
 		return
 	}
 
-	dbuser, err := router.Database.FetchUser(user)
+	dbuser, err := user.Fetch(router.Database)
 	if err != nil {
 		SendError(err.Error(), w)
 		return

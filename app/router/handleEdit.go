@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/deFarro/letsdoit_backend/app/data"
+	"github.com/deFarro/letsdoit_backend/app/todo"
 )
 
 // HandleEdit handles user login request
@@ -24,7 +24,7 @@ func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var todo data.Todo
+	var todo todo.Todo
 	err = json.Unmarshal(reqPayload, &todo)
 	if err != nil {
 		SendError("error while unmarshalling request payload", w)
@@ -33,7 +33,7 @@ func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "PUT":
-		updatedTodo, err := router.Database.AddModifyTodo(sessionID, todo)
+		updatedTodo, err := todo.AddModify(router.Database, sessionID)
 		if err != nil {
 			SendError(err.Error(), w)
 		}
@@ -46,7 +46,7 @@ func (router *Router) HandleEdit(w http.ResponseWriter, r *http.Request) {
 		w.Write(payload)
 
 	case "DELETE":
-		err = router.Database.FlushTodo(sessionID, todo.ID)
+		err = todo.Flush(router.Database, sessionID)
 		if err != nil {
 			SendError(err.Error(), w)
 		}

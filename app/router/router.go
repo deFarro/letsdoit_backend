@@ -5,11 +5,17 @@ import (
 	"github.com/deFarro/letsdoit_backend/app/database"
 	"net/http"
 	"encoding/json"
+	"github.com/deFarro/letsdoit_backend/app/user"
+	"github.com/deFarro/letsdoit_backend/app/todo"
+	"github.com/deFarro/letsdoit_backend/app/session"
 )
 
 type Router struct {
 	Settings config.Config
 	Database database.Database
+	UserTransporter user.UserTransporter
+	TodoTransporter todo.TodoTransporter
+	SessionTransporter session.SessionTransporter
 }
 
 // NewRouter creates new router instance
@@ -24,6 +30,7 @@ func NewRouter(settings config.Config) (Router, error) {
 		Database: db,
 	}, nil
 }
+
 // Error type for errors
 type Error struct {
 	Error   bool   `json:"error"`
