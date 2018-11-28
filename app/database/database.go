@@ -9,6 +9,7 @@ import (
 	"github.com/deFarro/letsdoit_backend/app/user"
 	"github.com/deFarro/letsdoit_backend/app/todo"
 	"github.com/deFarro/letsdoit_backend/app/session"
+	"time"
 )
 
 type Database struct {
@@ -35,7 +36,8 @@ func NewDatabase(settings config.Config) (Database, error) {
 		Settings: settings,
 	}
 
-	err := database.DropTables()
+	// Call first database operation with retries
+	err := TryToCall(database.DropTables, 5)
 	if err != nil {
 		return Database{}, err
 	}
@@ -46,6 +48,24 @@ func NewDatabase(settings config.Config) (Database, error) {
 	}
 
 	return database, nil
+}
+
+// TryToCall function tries to call any function needed amount of times once in a second
+func TryToCall(f func() error, attempts int) error {
+	timer := time.NewTicker(time.Second)
+	for {
+		<-timer.C
+
+		err := f()
+		if err == nil {
+			return nil
+		}
+
+		attempts--
+		if attempts == 0 {
+			return err
+		}
+	}
 }
 
 // PrepopulateDatabase populates database with users and todos if it's empty
@@ -87,6 +107,8 @@ func (db *Database) PrepopulateDatabase() error {
 
 // DropTables deletes all tables
 func (db *Database) DropTables() error {
+	fmt.Println("Trying to drop the tables")
+
 	for _, model := range []interface{}{&user.User{}, &todo.Todos{}, &session.Session{}} {
 		err := db.DB.DropTable(model, &orm.DropTableOptions{
 			IfExists: true,
