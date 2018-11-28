@@ -28,7 +28,8 @@ type SplittedTodos struct {
 // Todos is the type for a list of todos
 type Todos []Todo
 
-type TodoTransporter interface {
+// Resource interface to operate over todos
+type Resource interface {
 	GetUserByID(string) (user.User, error)
 	GetUserBySessionID(string) (user.User, error)
 	GetTodoByID(id string) (Todo, error)
@@ -77,8 +78,8 @@ func (todo1 Todo) IsAllowedToEdit(todo2 Todo, user user.User) bool {
 }
 
 // Fetch fetches all todos from db
-func (todo Todo) Fetch(tr TodoTransporter) (SplittedTodos, error) {
-	todos, err := tr.SelectAllTodos()
+func (todo Todo) Fetch(r Resource) (SplittedTodos, error) {
+	todos, err := r.SelectAllTodos()
 	if err != nil {
 		return SplittedTodos{}, err
 	}
@@ -87,12 +88,12 @@ func (todo Todo) Fetch(tr TodoTransporter) (SplittedTodos, error) {
 }
 
 // AddModifyTodo adds/updates todo to database
-func (todo Todo) AddModify(tr TodoTransporter, sessionID string) (Todo, error) {
+func (todo Todo) AddModify(r Resource, sessionID string) (Todo, error) {
 	// If todo is a new one, generate ID and save it in db
 	if todo.ID == "" {
 		todo.ID = todo.GenerateTodoID()
 
-		err := tr.InsertTodo(todo)
+		err := r.InsertTodo(todo)
 		if err != nil {
 			return Todo{}, err
 		}
@@ -101,12 +102,12 @@ func (todo Todo) AddModify(tr TodoTransporter, sessionID string) (Todo, error) {
 	}
 
 	// If todo exists, check if current user have rights to edit and update it
-	user, err := tr.GetUserBySessionID(sessionID)
+	user, err := r.GetUserBySessionID(sessionID)
 	if err != nil {
 		return Todo{}, err
 	}
 
-	fetchedTodo, err := tr.GetTodoByID(todo.ID)
+	fetchedTodo, err := r.GetTodoByID(todo.ID)
 	if err != nil {
 		return Todo{}, err
 	}
@@ -115,7 +116,7 @@ func (todo Todo) AddModify(tr TodoTransporter, sessionID string) (Todo, error) {
 		return Todo{}, errors.New("editing is forbidden")
 	}
 
-	err = tr.UpdateTodo(todo)
+	err = r.UpdateTodo(todo)
 	if err != nil {
 		return Todo{}, err
 	}
@@ -124,13 +125,13 @@ func (todo Todo) AddModify(tr TodoTransporter, sessionID string) (Todo, error) {
 }
 
 // FlushTodo deletes todo from db
-func (todo *Todo) Flush(tr TodoTransporter, sessionID string) error {
-	user, err := tr.GetUserBySessionID(sessionID)
+func (todo *Todo) Flush(r Resource, sessionID string) error {
+	user, err := r.GetUserBySessionID(sessionID)
 	if err != nil {
 		return err
 	}
 
-	fetchedTodo, err := tr.GetTodoByID(todo.ID)
+	fetchedTodo, err := r.GetTodoByID(todo.ID)
 	if err != nil {
 		return err
 	}
@@ -139,7 +140,7 @@ func (todo *Todo) Flush(tr TodoTransporter, sessionID string) error {
 		return errors.New("delete is forbidden")
 	}
 
-	err = tr.DeleteTodo(fetchedTodo)
+	err = r.DeleteTodo(fetchedTodo)
 	if err != nil {
 		return err
 	}

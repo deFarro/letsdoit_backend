@@ -24,8 +24,8 @@ type PublicUser struct {
 	Username string `json:"username"`
 }
 
-//
-type UserTransporter interface {
+// Resource interface to operate over users
+type Resource interface {
 	GetUserByID(string) (User, error)
 	GetUserBySessionID(string) (User, error)
 	InsertSession(session.Session) error
@@ -60,10 +60,10 @@ func (u *User) MarshallJSON() ([]byte, error) {
 }
 
 // FetchUser fetches user from db, checks password, create user session and returns user
-func (u User) Fetch(tr UserTransporter) (User, error) {
+func (u User) Fetch(r Resource) (User, error) {
 	userID := fmt.Sprintf("%x", md5.Sum([]byte(u.Username)))
 
-	currentUser, err := tr.GetUserByID(userID)
+	currentUser, err := r.GetUserByID(userID)
 	if err != nil {
 		return User{}, err
 	}
@@ -72,17 +72,7 @@ func (u User) Fetch(tr UserTransporter) (User, error) {
 		return User{}, errors.New("wrong password")
 	}
 
-	session := session.Session{
-		ID: currentUser.GenerateSessionID(),
-		UserID: currentUser.ID,
-	}
-
-	err = tr.InsertSession(session)
-	if err != nil {
-		return User{}, errors.New("cannot save session")
-	}
-
-	currentUser.SessionID = session.ID
+	currentUser.SessionID = currentUser.GenerateSessionID()
 
 	return currentUser, nil
 }

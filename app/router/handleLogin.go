@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/deFarro/letsdoit_backend/app/user"
+	"github.com/deFarro/letsdoit_backend/app/session"
 )
 
 // HandleLogin handles user login request
@@ -31,6 +32,17 @@ func (router *Router) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	dbuser, err := user.Fetch(router.Database)
 	if err != nil {
 		SendError(err.Error(), w)
+		return
+	}
+
+	session := session.Session{
+		ID: dbuser.SessionID,
+		UserID: dbuser.ID,
+	}
+
+	err = session.Insert(router.Database)
+	if err != nil {
+		SendError("cannot save session", w)
 		return
 	}
 
