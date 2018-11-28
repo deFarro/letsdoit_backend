@@ -18,8 +18,8 @@ type Todo struct {
 	Author      user.PublicUser `json:"author"`
 }
 
-// SortedTodos is the type for all todos
-type SortedTodos struct {
+// SplittedTodos is the type for all todos splitted by status
+type SplittedTodos struct {
 	Upcoming   Todos `json:"upcoming"`
 	InProgress Todos `json:"inprogress"`
 	Completed  Todos `json:"completed"`
@@ -28,7 +28,6 @@ type SortedTodos struct {
 // Todos is the type for a list of todos
 type Todos []Todo
 
-//
 type TodoTransporter interface {
 	GetUserByID(string) (user.User, error)
 	GetUserBySessionID(string) (user.User, error)
@@ -40,8 +39,8 @@ type TodoTransporter interface {
 }
 
 // Sort method distribute todos to buckets based on status
-func (tds Todos) Sort() SortedTodos {
-	result := SortedTodos{
+func (tds Todos) Split() SplittedTodos {
+	result := SplittedTodos{
 		Upcoming: []Todo{},
 		InProgress: []Todo{},
 		Completed: []Todo{},
@@ -78,13 +77,13 @@ func (todo1 Todo) IsAllowedToEdit(todo2 Todo, user user.User) bool {
 }
 
 // Fetch fetches all todos from db
-func (todo Todo) Fetch(tr TodoTransporter) (SortedTodos, error) {
+func (todo Todo) Fetch(tr TodoTransporter) (SplittedTodos, error) {
 	todos, err := tr.SelectAllTodos()
 	if err != nil {
-		return SortedTodos{}, err
+		return SplittedTodos{}, err
 	}
 
-	return todos.Sort(), nil
+	return todos.Split(), nil
 }
 
 // AddModifyTodo adds/updates todo to database
